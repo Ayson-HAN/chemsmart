@@ -785,3 +785,26 @@ def test_gromacs_prerun_generates_missing_mdp_before_validation(tmp_path):
     assert job.mdp_file == tmp_path / "nvt.mdp"
     assert job.mdp_file.exists()
     assert "integrator" in job.mdp_file.read_text(encoding="utf-8")
+
+def test_gromacs_runner_uses_project_label_for_default_deffnm(tmp_path):
+    job = GromacsNVTJob(
+        molecule=None,
+        label="ubiquitin_nvt",
+        jobrunner=None,
+        mdp_file=tmp_path / "nvt.mdp",
+        structure_file=tmp_path / "em.gro",
+        top_file=tmp_path / "topol.top",
+        workflow="prepared",
+    )
+
+    job.set_folder(str(tmp_path))
+
+    runner = _make_runner()
+    command = runner._get_mdrun_command(job)
+
+    assert command == [
+        "gmx",
+        "mdrun",
+        "-deffnm",
+        str(tmp_path / "ubiquitin_nvt"),
+    ]
