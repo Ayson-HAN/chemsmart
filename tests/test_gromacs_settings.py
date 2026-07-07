@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from chemsmart.jobs.gromacs.job import GromacsEMJob, GromacsJob
+from chemsmart.jobs.gromacs.job import GromacsEMJob, GromacsJob,GromacsNVTJob
 from chemsmart.settings.gromacs import GromacsProjectSettings
 
 
@@ -372,3 +372,54 @@ inputs:
     assert updated.input_pdb == tmp_path / "input.pdb"
     assert updated.force_field == "amber99sb-ildn"
     assert updated.water_model == "tip3p"
+
+def test_gromacs_project_settings_allows_missing_mdp_for_prepared():
+    settings = GromacsProjectSettings(
+        workflow="prepared",
+        job_type="nvt",
+        mdp_file=None,
+        structure_file="em.gro",
+        top_file="topol.top",
+    )
+
+    settings.validate()
+
+
+def test_gromacs_project_settings_passes_mdp_writer_parameters_to_job_kwargs():
+    settings = GromacsProjectSettings(
+        workflow="prepared",
+        job_type="nvt",
+        mdp_file=None,
+        structure_file="em.gro",
+        top_file="topol.top",
+        temperature=310,
+        timestep=0.001,
+        thermostat="V-rescale",
+        constraints="h-bonds",
+        constraint_algorithm="lincs",
+    )
+
+    job_kwargs = settings.to_job_kwargs()
+
+    assert job_kwargs["temperature"] == 310
+    assert job_kwargs["timestep"] == 0.001
+    assert job_kwargs["thermostat"] == "V-rescale"
+    assert job_kwargs["constraints"] == "h-bonds"
+    assert job_kwargs["constraint_algorithm"] == "lincs"
+    assert "mdp_file" not in job_kwargs
+
+def test_gromacs_project_name_sets_job_label_and_default_tpr_file(tmp_path):
+    settings = GromacsProjectSettings(
+        project_name="ubiquitin_nvt",
+        workflow="prepared",
+        job_type="nvt",
+        mdp_file=None,
+        structure_file=tmp_path / "em.gro",
+        top_file=tmp_path / "topol.top",
+    )
+
+    job = GromacsNVTJob.from_project_settings(settings=settings)
+    job.set_folder(str(tmp_path))
+
+    assert job.label == "ubiquitin_nvt"
+    assert job.tpr_file == tmp_path / "ubiquitin_nvt.tpr"

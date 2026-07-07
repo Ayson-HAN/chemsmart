@@ -49,6 +49,13 @@ class GromacsJob(Job):
         barostat=None,
         constraints=None,
         constraint_algorithm=None,
+        nsteps=None,
+        emtol=None,
+        emstep=None,
+        tau_t=None,
+        tc_grps=None,
+        tau_p=None,
+        compressibility=None,
         box_type="cubic",
         box_distance=1.0,
         solvent_file=None,
@@ -121,6 +128,14 @@ class GromacsJob(Job):
         self.barostat = barostat
         self.constraints = constraints
         self.constraint_algorithm = constraint_algorithm
+
+        self.nsteps = nsteps
+        self.emtol = emtol
+        self.emstep = emstep
+        self.tau_t = tau_t
+        self.tc_grps = tc_grps
+        self.tau_p = tau_p
+        self.compressibility = compressibility
 
         self.box_type = box_type
         self.box_distance = box_distance
@@ -257,6 +272,7 @@ class GromacsEMJob(GromacsJob):
             **kwargs,
         )
 
+
 class GromacsNVTJob(GromacsJob):
     """
     NVT equilibration job for GROMACS.
@@ -294,3 +310,40 @@ class GromacsNVTJob(GromacsJob):
             **kwargs,
         )
 
+
+class GromacsNPTJob(GromacsJob):
+    """
+    NPT equilibration job for GROMACS.
+    """
+
+    TYPE = "gmxnpt"
+
+    def __init__(
+        self,
+        molecule=None,
+        label="gromacs_npt",
+        jobrunner=None,
+        mdp_file=None,
+        structure_file=None,
+        input_pdb=None,
+        top_file=None,
+        tpr_file=None,
+        itp_files=None,
+        index_file=None,
+        workflow="prepared",
+        **kwargs,
+    ):
+        super().__init__(
+            molecule=molecule,
+            label=label,
+            jobrunner=jobrunner,
+            mdp_file=mdp_file,
+            structure_file=structure_file,
+            input_pdb=input_pdb,
+            top_file=top_file,
+            tpr_file=tpr_file,
+            itp_files=itp_files,
+            index_file=index_file,
+            workflow=workflow,
+            **kwargs,
+        )
