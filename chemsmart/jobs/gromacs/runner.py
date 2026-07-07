@@ -89,7 +89,7 @@ class GromacsJobRunner(JobRunner):
         # and assign the generated file back to job.mdp_file.
         self._write_input(job)
 
-        workflow = getattr(job, "workflow", "prepared")
+        workflow =job.workflow
 
         if workflow == "prepared":
             self._validate_gromacs_inputs(job)
@@ -353,7 +353,7 @@ class GromacsJobRunner(JobRunner):
         This is mainly useful for unit tests and dry structural validation.
         Real execution is handled through _prerun and _get_command.
         """
-        workflow = getattr(job, "workflow", "prepared")
+        workflow = job.workflow
 
         if workflow == "prepared":
             return [
